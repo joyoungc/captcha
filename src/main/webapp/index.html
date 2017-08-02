@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SimpleCaptCha Servlet Sample</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Imagetoolbar" content="no" />
+ 
+<script type="text/javascript"  src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript">
+	 
+	$(document).ready(function() {
+		
+		var rand;
+		
+		function getAudioCaptcha() {
+			
+			var uAgent = navigator.userAgent;
+			var soundUrl = '/simpleCaptcha?gubun=audio';
+			
+			if (uAgent.indexOf('Trident') > -1 || uAgent.indexOf('MSIE') > -1) {
+				winPlayer(soundUrl+'&agent=msie');
+			} else if (!!document.createElement('audio').canPlayType) {
+				try { new Audio(soundUrl).play(); } catch(e) { winPlayer(soundUrl); }
+			} else {
+				window.open(soundUrl, '', 'width=1,height=1');
+			}
+		}
+		
+		function winPlayer(objUrl) {
+			$('#audiocatpch').html('<bgsound src="' + objUrl + '">');
+		}
+		 
+		//캡차 이미지 요청 (캐쉬문제로 인해 이미지가 변경되지 않을수 있으므로 요청시마다 랜덤숫자를 생성하여 요청)
+		function getTextCaptcha() {
+			rand = Math.random();
+			$('#catpcha').html('<img src="/simpleCaptcha?gubun=text&rand=' + rand + '"/>');
+		}
+	      
+		getTextCaptcha(); //캡차 이미지 요청
+		
+		$('#reLoad').click(function(){ getTextCaptcha(); }); //새로고침버튼에 클릭이벤트 등록
+		$('#soundOn').click(function(){ getAudioCaptcha(); }); //한글음성듣기 버튼에 클릭이벤트 등록
+		
+		//확인 버튼 클릭시
+		$('#submit').click(function(){
+			if ( !$('#answer').val() ) {
+				alert('이미지에 보이는 숫자 또는 스피커를 통해 들리는 숫자를 입력해 주세요.');
+			} else {
+				$.ajax({
+					url: '/simpleCaptcha?gubun=confirm',
+			        type: 'POST',
+			        dataType: 'text',
+			        data: 'answer=' + $('#answer').val(),
+			        async: false,
+			        success: function(resp) {
+			        	alert(resp);
+			        	getTextCaptcha();
+						$('#answer').val('');
+					}
+				});
+			}
+		});
+	});
+</script>
+</head>
+<body>
+	<div id="catpcha"></div>
+	<div id="audiocatpch" style="display: none;"></div>
+	
+	<input id="reLoad" type="button" value="새로고침" />
+	<input id="soundOn" type="button" value="음성듣기" />
+	<br />
+	<input type="text" id="answer" name="answer" />
+	<input type="button" id="submit" value="확인" />
+</body> 
+</html>
