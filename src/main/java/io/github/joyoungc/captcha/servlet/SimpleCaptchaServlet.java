@@ -74,15 +74,15 @@ public class SimpleCaptchaServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String gubun = Objects.toString(request.getParameter("gubun"),"");
+		String requestType = Objects.toString(request.getParameter("requestType"),"");
 		HttpSession session = request.getSession(); 
 		
-		System.out.println("## GET ( " + session.getId() + " ) : " + gubun);
+		System.out.println("## GET ( " + session.getId() + " ) : " + requestType);
 		
 		/***
 		 * Captcha 텍스트 이미지 생성
 		 */
-		if ("text".equals(gubun)) {
+		if ("text".equals(requestType)) {
 			
 			Captcha captcha = new Captcha.Builder(_width, _height)
 					.addText(new NumbersAnswerProducer(6), new ColoredEdgesWordRenderer(COLORS, FONTS))
@@ -100,7 +100,7 @@ public class SimpleCaptchaServlet extends HttpServlet {
 		/***
 		 * Captcha 음성 생성
 		 */			
-		} else if ("audio".equals(gubun)) {
+		} else if ("audio".equals(requestType)) {
 			
 			Captcha captcha = (Captcha) session.getAttribute(Captcha.NAME);
 			
@@ -110,11 +110,12 @@ public class SimpleCaptchaServlet extends HttpServlet {
 					.addNoise()
 					.build();
 			session.setAttribute(AudioCaptcha.NAME, audioCaptcha);
+			
 			CaptchaServletUtil.writeAudio(response, audioCaptcha.getChallenge());
 			
 		} else {
 			PrintWriter out = response.getWriter();
-			out.print("There is no gubun.");
+			out.print("There is no requestType.");
 		}
 
 	}
@@ -125,11 +126,11 @@ public class SimpleCaptchaServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String gubun = Objects.toString(request.getParameter("gubun"),"");
+		String requestType = Objects.toString(request.getParameter("requestType"),"");
 		HttpSession session = request.getSession();
-		System.out.println("## POST ( " + session.getId() + " ) : " + gubun);
+		System.out.println("## POST ( " + session.getId() + " ) : " + requestType);
 		
-		if ("confirm".equals(gubun)) {
+		if ("confirm".equals(requestType)) {
 			
 			Captcha captcha = (Captcha) session.getAttribute(Captcha.NAME);
 			PrintWriter out = response.getWriter();
@@ -146,7 +147,7 @@ public class SimpleCaptchaServlet extends HttpServlet {
 			
 		} else {
 			PrintWriter out = response.getWriter();
-			out.print("There is no gubun.");
+			out.print("There is no requestType.");
 		}
 	}
 
